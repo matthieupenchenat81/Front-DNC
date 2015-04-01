@@ -1,0 +1,103 @@
+<div class="header">
+  <div class="navbar navbar-inverse navbar-static-top" style="margin-bottom: 0" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#/">Dog Is Not a Chat</a>
+        <p class="navbar-text">Signed in as Homer Simpson <!-- <a style="margin-left: 10px" class="navbar-right click" ng-click="logout()">Log out</a> --></p>
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Update pseudo">
+          </div>
+          <button type="submit" class="btn btn-default">Update</button>
+        </form>
+        <form class="navbar-form navbar-right" role="search">
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#options">
+            <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> Away From Keyboard
+          </button>
+          <button type="button" class="btn btn-default" ng-click="logout()">
+            <span class="glyphicon glyphicon-off" aria-hidden="true"></span> Log out
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+      <div class="col-xs-4 scroll">
+        <a href="#"><h3>#Discussion générale</h3></a><hr>
+        <h3>Messages privés</h3>
+        <div class="list-group">
+          <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+          <a href="#" class="list-group-item">Morbi leo risus</a>
+          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+          <a href="#" class="list-group-item">Vestibulum at eros</a>
+          <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+          <a href="#" class="list-group-item">Morbi leo risus</a>
+          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+          <a href="#" class="list-group-item">Vestibulum at eros</a>    <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+          <a href="#" class="list-group-item">Morbi leo risus</a>
+          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+          <a href="#" class="list-group-item">Vestibulum at eros</a>    <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+          <a href="#" class="list-group-item">Morbi leo risus</a>
+          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+          <a href="#" class="list-group-item">Vestibulum at eros</a>
+        </div>
+      </div>
+      <div class="col-xs-8 well scroll" style="margin-bottom: 0">
+
+        <h4>Discussion générale</h4><hr>
+        <div class="row fixrow">
+          <div class="bubble-right right">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</div>
+        </div>
+        <div class="row fixrow">
+          <div class="bubble-left left">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</div>
+        </div>          
+          
+        <div class="row fixrow">
+          <div class="bubble-left left">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</div>
+        </div>
+
+      </div>
+  </div>
+</div>
+
+
+<nav class="navbar navbar-default bottom" style="margin-bottom: 0">
+  <br>
+  <div class="container-fluid">
+    <textarea class="form-control"></textarea><br>
+    <div class="col-xs-offset-7 col-xs-4">
+      <input class="form-control" type="file"/>
+    </div>
+    <button type="submit" class="btn btn-primary" style="float:right">Send</button>
+  </div>
+  <br>
+</nav>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="options" tabindex="-1" role="dialog" aria-labelledby="options" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="options">Away From Keyboard</h4>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col-xs-offset-3 col-xs-6">
+            <div class="thumbnail click" ng-click="closeModal()">
+              <img src="http://at-cdn-s01.audiotool.com/2014/06/03/documents/get_ready_get_ready_for_full_version_soon/1/cover256x256-1fce1b23587b4c61a2c81edf1e798b7b.jpg">
+              <div class="caption">
+                <center><h3>Get Ready To Chat Again?</h3></center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

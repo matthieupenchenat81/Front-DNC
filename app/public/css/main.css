@@ -1,0 +1,103 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.bottom {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.click {
+  cursor: pointer;
+}
+
+.scroll {
+  overflow-y : scroll;
+  height: 450px;
+}
+
+.right {
+  float: right;
+}
+
+.left {
+  float: left;
+}
+
+textarea {
+   resize: none;
+}
+
+
+/* Bubble right */
+
+.bubble-right
+{
+display: inline;
+margin-bottom: 7px;
+position: relative;
+padding: 10px;
+min-width: 210px;
+min-height: 60px;
+background: #4183D7;
+-webkit-border-radius: 10px;
+-moz-border-radius: 10px;
+border-radius: 10px;
+}
+
+.bubble-right:after 
+{
+content: '';
+position: absolute;
+border-style: solid;
+border-width: 15px 0 15px 15px;
+border-color: transparent #4183D7;
+display: block;
+width: 0;
+z-index: 1;
+right: -7px;
+top: 0px;
+}
+
+
+
+
+/* Bubble left */
+
+
+.bubble-left
+{
+display: inline;
+margin-bottom: 7px;
+position: relative;
+padding: 10px;
+min-width: 210px;
+min-height: 60px;
+background: #2ECC71;
+-webkit-border-radius: 10px;
+-moz-border-radius: 10px;
+border-radius: 10px;
+}
+
+.bubble-left:after 
+{
+content: '';
+position: absolute;
+border-style: solid;
+border-width: 15px 15px 15px 0;
+border-color: transparent #2ECC71;
+display: block;
+width: 0;
+z-index: 1;
+left: -7px;
+top: 0px;
+}
+
+.fixrow {
+  padding-left: 10px;
+  padding-right: 10px;
+}
