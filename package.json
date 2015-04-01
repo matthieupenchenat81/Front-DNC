@@ -17,7 +17,7 @@
     },
     "window": {
         "title": "clientdnc",
-        "toolbar": false,
+        "toolbar": true,
         "frame": true,
         "position": "center",
         "fullscreen": false,

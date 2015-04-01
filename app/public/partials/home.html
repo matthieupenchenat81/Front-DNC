@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <a class="navbar-brand" href="#/">Dog Is Not a Chat</a>
-        <p class="navbar-text">Signed in as Homer Simpson <!-- <a style="margin-left: 10px" class="navbar-right click" ng-click="logout()">Log out</a> --></p>
+        <p class="navbar-text">Signed in as {{userName}} <!-- <a style="margin-left: 10px" class="navbar-right click" ng-click="logout()">Log out</a> --></p>
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
             <input type="text" class="form-control" placeholder="Update pseudo">
@@ -26,40 +26,23 @@
 <div class="container-fluid">
   <div class="row">
       <div class="col-xs-4 scroll">
-        <a href="#"><h3>#Discussion générale</h3></a><hr>
+        <a ng-click="openConversation('all')" class="click"><h3>#Discussion générale</h3></a><hr>
         <h3>Messages privés</h3>
         <div class="list-group">
-          <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-          <a href="#" class="list-group-item">Morbi leo risus</a>
-          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
-          <a href="#" class="list-group-item">Vestibulum at eros</a>
-          <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-          <a href="#" class="list-group-item">Morbi leo risus</a>
-          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
-          <a href="#" class="list-group-item">Vestibulum at eros</a>    <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-          <a href="#" class="list-group-item">Morbi leo risus</a>
-          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
-          <a href="#" class="list-group-item">Vestibulum at eros</a>    <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-          <a href="#" class="list-group-item">Morbi leo risus</a>
-          <a href="#" class="list-group-item">Porta ac consectetur ac</a>
-          <a href="#" class="list-group-item">Vestibulum at eros</a>
+          <a ng-click="openConversation('Jerome')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Quentin')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Renan')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Alfred')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Alexandre')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('George')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Maurice')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Ursula')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Jeje')" class="list-group-item click">Dapibus ac facilisis in</a>
+          <a ng-click="openConversation('Overflow')" class="list-group-item click">Dapibus ac facilisis in</a>
         </div>
       </div>
-      <div class="col-xs-8 well scroll" style="margin-bottom: 0">
 
-        <h4>Discussion générale</h4><hr>
-        <div class="row fixrow">
-          <div class="bubble-right right">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</div>
-        </div>
-        <div class="row fixrow">
-          <div class="bubble-left left">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</div>
-        </div>          
-          
-        <div class="row fixrow">
-          <div class="bubble-left left">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</div>
-        </div>
-
-      </div>
+      <div ui-view></div>
   </div>
 </div>
 

@@ -17,18 +17,24 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     templateUrl: "partials/login.html",
     controller: "MainCtrl"
   }).state("home", {
-    url: "/home",
+    url: "/conversation",
     templateUrl: "partials/home.html",
     controller: "MainCtrl"
+  }).state("home.message", {
+    url: "/{pseudo}",
+    templateUrl: "partials/messages.html",
   });
 
 });
 
 
-app.controller('MainCtrl', function ($scope, $state) {
+app.controller('MainCtrl', function ($scope, $state, $rootScope) {
     
-    $scope.login = function() {
-      $state.go('home');
+    $scope.login = function(user) {
+      $state.go('home.message', {
+        pseudo: 'all'
+      });
+      $rootScope.userName = user;
     };
 
     $scope.closeModal = function() {
@@ -38,5 +44,19 @@ app.controller('MainCtrl', function ($scope, $state) {
     $scope.logout = function() {
       $state.go('login');
     };
+
+    $scope.isGeneralConversation = function() {
+      return ($scope.currentConversation == 'all');
+    };
+
+    $scope.openConversation = function(nickname) {
+
+      $scope.currentConversation = nickname;
+      $state.go('home.message', {
+        pseudo: nickname
+      });
+    };
+
+    $scope.currentConversation = 'all';
 });
 
