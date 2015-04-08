@@ -24,7 +24,6 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     url: "/{pseudo}",
     templateUrl: "partials/messages.html"
   });
-
 });
 
 app.factory('Tools', function($rootScope) {
@@ -61,6 +60,7 @@ app.controller('LoginCtrl', function($scope, $state, $rootScope, Tools) {
 
       // Node JS 
       var HOST = '127.0.0.1';
+      //var HOST = '172.31.190.68';
       var PORT = 2222;
 
       Tools.createClient();
@@ -146,8 +146,13 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
 
     $scope.sendPrivateMessage = function(message) {
       Tools.getClient().write('/pm ' + $scope.currentConversation + ' ' + message);
-      console.log('/pm ' + $scope.currentConversation + ' ' + message);
-      //$scope.privateMessageToSend = message;
+      $scope.privateMessageToSend = message;
+      $scope.fileName = $("#file").val().replace(/.*(\/|\\)/, '');
+      if($scope.fileName != '') {
+        setTimeout(function() {
+          Tools.getClient().write('/pmfile ' + $scope.currentConversation + ' ' + $scope.fileName);
+        }, 1000);
+      }
     };
 
     $scope.hasAccepted = function() {
@@ -156,24 +161,6 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           return $scope.conversation[i].hasAccepted;
       };
     };
-
-    //$scope.getMessageToSend = function() {
-    //   for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-    //     if($scope.conversation[i].name == $scope.currentConversation) {
-    //       if(!$scope.conversation[i].messageToSend)
-    //         $scope.conversation[i].messageToSend = '';
-    //       return $scope.conversation[i].messageToSend;
-    //     }
-          
-    //   };
-    // };
-
-    // $scope.resetMessageToSend = function() {
-    //   for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-    //     if($scope.conversation[i].name == $scope.currentConversation)
-    //       $scope.conversation[i].messageToSend = '';
-    //   };
-    // };
 
     $scope.acceptConversation = function() {
       for (var i = $scope.conversation.length - 1; i >= 0; i--) {
@@ -187,6 +174,19 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         if($scope.conversation[i].name == $scope.currentConversation)
           $scope.conversation[i].hasAccepted = false;
       };
+
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          $scope.conversation[i].isWaiting = false;
+      };
+    };
+
+    $scope.acceptPrivateConversation = function() {
+      Tools.getClient().write('/acceptpm '+ $scope.currentConversation);
+    };
+
+    $scope.rejectPrivateConversation = function() {
+      Tools.getClient().write('/rejectpm '+ $scope.currentConversation);
     };
 
     $scope.askToTalk = function() {
@@ -197,6 +197,13 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       for (var i = $scope.conversation.length - 1; i >= 0; i--) {
         if($scope.conversation[i].name == $scope.currentConversation)
           return $scope.conversation[i].isWaiting;
+      };
+    };
+
+    $scope.hasBeenAsked = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          return $scope.conversation[i].hasBeenAsked;
       };
     };
 
@@ -226,8 +233,8 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         //ERR_DEST_NOT_FOUND
         //ERR_NOT_ACCEPTED
 
-        //CHANNEL_JOINED_AS nicknameUSERLISTUSERLISTAWAY
-        if(data.toString().indexOf('CHANNEL_JOINED_AS') != -1) {
+        //SUCC_CHANNEL_JOINEDUSERLIST Malibu81USERLISTAWAY
+        if(data.toString().indexOf('SUCC_CHANNEL_JOINED') != -1) {
           var users = data.toString().split("USERLIST")[1].split('USERLISTAWAY')[0].split(" ");
           users.shift();
           $scope.users = users;
@@ -245,8 +252,8 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           $scope.newname = '';
         };
 
-        //SUCCESSFUL_MESSAGE_SENDED
-        if(data == ('SUCCESSFUL_MESSAGE_SENDED')) {
+        //SUCC_MESSAGE_SENDED
+        if(data == ('SUCC_MESSAGE_SENDED')) {
 
           angular.forEach($scope.conversation, function(el) {
             if(el.name == 'all')
@@ -337,8 +344,8 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           };
         }
 
-        //SUCC_PRIVATE_DISCUSSION_ACCEPTED
-        if(data.toString().indexOf('SUCC_PRIVATE_DISCUSSION_ACCEPTED') != -1) {
+        //PRIVATE_DISCU_ACCEPTED_FROM
+        if(data.toString().indexOf('PRIVATE_DISCU_ACCEPTED_FROM') != -1) {
           angular.forEach($scope.conversation, function(el) {
             if(el.name == $scope.currentConversation)
               el.messages.push({status: 'received', text: 'conversation accepted', sender: $scope.currentConversation});
@@ -346,8 +353,8 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           $scope.acceptConversation();  
         }
         
-        //SUCC_PRIVATE_DISCUSSION_REFUSED
-        if(data.toString().indexOf('SUCC_PRIVATE_DISCUSSION_REFUSED') != -1) {
+        //PRIVATE_DISCU_REFUSED_FROM
+        if(data.toString().indexOf('PRIVATE_DISCU_REFUSED_FROM') != -1) {
           angular.forEach($scope.conversation, function(el) {
             if(el.name == $scope.currentConversation)
               el.messages.push({status: 'received', text: 'conversation rejected', sender: $scope.currentConversation});
@@ -361,8 +368,65 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
             if(el.name == $scope.currentConversation)
               el.messages.push({status: 'sended', text: $scope.privateMessageToSend, sender: $scope.userName});
           });
+          $('#privateMessageId').val('');
           $scope.privateMessageToSend = '';
+          $rootScope.privateMessageToSend = '';
         }
+
+        //NEW_PM Quentin blabla
+        if(data.toString().indexOf('NEW_PM') != -1) {
+          var sender = data.toString().split(' ')[1];
+          var text = data.toString().split(sender + ' ')[1];
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation)
+              el.messages.push({status: 'received', text: text, sender: sender});
+          });
+        }
+
+        //ASKING_FOR_PM Quentin
+        if(data.toString().indexOf('ASKING_FOR_PM') != -1) {
+          var sender = data.toString().split(' ')[1];
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation) {
+              el.messages.push({status: 'received', text: 'asking for a conversation', sender: sender});
+              el.hasBeenAsked = true;
+            }
+          });
+        }
+
+
+        //SUCCESSFUL_REFUSED
+        if(data.toString().indexOf('SUCCESSFUL_REFUSED') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation) {
+              el.messages.push({status: 'sended', text: 'conversation rejected', sender: $scope.userName});
+              el.hasBeenAsked = false;
+            }
+          });
+          $scope.rejectConversation();
+        }
+
+        //SUCCESSFUL_ACCEPTED
+        if(data.toString().indexOf('SUCCESSFUL_ACCEPTED') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation) {
+              el.messages.push({status: 'sended', text: 'conversation accepted', sender: $scope.userName});
+              el.hasBeenAsked = false;
+            }
+          });
+          $scope.acceptConversation();
+        }
+
+        //SUCC_PMFILE
+        if(data.toString().indexOf('SUCC_PMFILE') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation) {
+              el.messages.push({status: 'sended', text: 'asking to share: ' + $scope.fileName, sender: $scope.userName});
+            }
+          });
+          $scope.fileName = '';
+        }        
+
 
         // Refresh scope
         $scope.$apply();

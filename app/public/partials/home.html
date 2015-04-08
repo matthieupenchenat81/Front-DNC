@@ -50,15 +50,18 @@
 
   <div ng-show="!isGeneralConversation()" class="container-fluid">
     <div ng-if="hasAccepted()">
-      <textarea class="form-control" ng-model="privateMessageToSend"></textarea><br>
+      <textarea class="form-control" id="privateMessageId" ng-model="privateMessageToSend"></textarea><br>
       <div class="col-xs-offset-7 col-xs-4">
-        <input class="form-control" type="file"/>
+        <input class="form-control" id="file" type="file"/>
       </div>
       <button type="submit" class="btn btn-primary" style="float:right" ng-click="sendPrivateMessage(privateMessageToSend)">Send</button>
     </div>
     <div ng-if="!hasAccepted()">
-      <button type="submit" class="btn btn-primary" ng-if="!isWaiting()" style="float:right" ng-click="askToTalk()">Ask to have conversation</button>
-      <button type="submit" class="btn btn-primary" ng-if="isWaiting()" style="float:right" ng-click="acceptConversation()">Waiting for response... :D</button>
+      <button type="submit" class="btn btn-primary" ng-if="!isWaiting() && !hasBeenAsked()" style="float:right" ng-click="askToTalk()">Ask to have conversation</button>
+
+      <button type="submit" class="btn btn-primary" ng-if="!isWaiting() && hasBeenAsked()" style="float:right" ng-click="acceptPrivateConversation()">Accept</button> <button type="submit" class="btn btn-primary" ng-if="!isWaiting() && hasBeenAsked()" style="float:right" ng-click="rejectPrivateConversation()">Reject</button>
+
+      <button type="submit" class="btn btn-primary" ng-if="isWaiting()" disabled style="float:right">Waiting for response... :D</button>
     </div>
   </div>
   <br>
