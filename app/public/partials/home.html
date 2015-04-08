@@ -43,17 +43,26 @@
 
 <nav class="navbar navbar-default bottom" style="margin-bottom: 0">
   <br>
-  <div class="container-fluid">
+  <div ng-show="isGeneralConversation()" class="container-fluid">
     <textarea class="form-control" ng-model="messageToSend"></textarea><br>
-
-    <div ng-show="!isGeneralConversation()" class="col-xs-offset-7 col-xs-4">
-      <input class="form-control" type="file"/>
-    </div>
     <button type="submit" class="btn btn-primary" style="float:right" ng-click="sendMessage(messageToSend)">Send</button>
+  </div>
+
+  <div ng-show="!isGeneralConversation()" class="container-fluid">
+    <div ng-if="hasAccepted()">
+      <textarea class="form-control" ng-model="privateMessageToSend"></textarea><br>
+      <div class="col-xs-offset-7 col-xs-4">
+        <input class="form-control" type="file"/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="float:right" ng-click="sendPrivateMessage(privateMessageToSend)">Send</button>
+    </div>
+    <div ng-if="!hasAccepted()">
+      <button type="submit" class="btn btn-primary" ng-if="!isWaiting()" style="float:right" ng-click="askToTalk()">Ask to have conversation</button>
+      <button type="submit" class="btn btn-primary" ng-if="isWaiting()" style="float:right" ng-click="acceptConversation()">Waiting for response... :D</button>
+    </div>
   </div>
   <br>
 </nav>
-
 
 
 <!-- Modal -->

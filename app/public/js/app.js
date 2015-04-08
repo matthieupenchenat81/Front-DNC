@@ -22,8 +22,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     controller: 'MainCtrl'
   }).state("home.message", {
     url: "/{pseudo}",
-    templateUrl: "partials/messages.html",
-    controller: 'MessageCtrl'
+    templateUrl: "partials/messages.html"
   });
 
 });
@@ -113,7 +112,7 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       })
       // If conversation don't exist
       if(exist == false)
-        $scope.conversation.push({name: nickname, messages: []});
+        $scope.conversation.push({name: nickname, messages: [], hasAccepted: false, isWaiting: false});
     };
 
     $scope.getCurrentConversation = function() {
@@ -145,9 +144,64 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       }
     };
 
-    $scope.init = function() {
+    $scope.sendPrivateMessage = function(message) {
+      Tools.getClient().write('/pm ' + $scope.currentConversation + ' ' + message);
+      console.log('/pm ' + $scope.currentConversation + ' ' + message);
+      //$scope.privateMessageToSend = message;
+    };
 
-      
+    $scope.hasAccepted = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          return $scope.conversation[i].hasAccepted;
+      };
+    };
+
+    //$scope.getMessageToSend = function() {
+    //   for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+    //     if($scope.conversation[i].name == $scope.currentConversation) {
+    //       if(!$scope.conversation[i].messageToSend)
+    //         $scope.conversation[i].messageToSend = '';
+    //       return $scope.conversation[i].messageToSend;
+    //     }
+          
+    //   };
+    // };
+
+    // $scope.resetMessageToSend = function() {
+    //   for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+    //     if($scope.conversation[i].name == $scope.currentConversation)
+    //       $scope.conversation[i].messageToSend = '';
+    //   };
+    // };
+
+    $scope.acceptConversation = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          $scope.conversation[i].hasAccepted = true;
+      };
+    };
+
+    $scope.rejectConversation = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          $scope.conversation[i].hasAccepted = false;
+      };
+    };
+
+    $scope.askToTalk = function() {
+      Tools.getClient().write('/askpm '+ $scope.currentConversation);
+    };
+
+    $scope.isWaiting = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          return $scope.conversation[i].isWaiting;
+      };
+    };
+
+    $scope.init = function() {
+  
       $scope.messages = [];
       $scope.conversation = [];
 
@@ -168,6 +222,9 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         //ERR_NICKNAME_ALREADY_USED
         //ERR_INVALID_NICKNAME
         //ERR_NICKNAME_ALREADY_USED
+        //ERR_USER_HAS_NOT_ASK
+        //ERR_DEST_NOT_FOUND
+        //ERR_NOT_ACCEPTED
 
         //CHANNEL_JOINED_AS nicknameUSERLISTUSERLISTAWAY
         if(data.toString().indexOf('CHANNEL_JOINED_AS') != -1) {
@@ -266,13 +323,50 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           $scope.users.push(user);
         }
 
+
+        //SUCCESSFUL_ASKED
+        if(data.toString().indexOf('SUCCESSFUL_ASKED') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation)
+              el.messages.push({status: 'sended', text: 'asking for a conversation', sender: $scope.userName});
+          });
+
+          for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+            if($scope.conversation[i].name == $scope.currentConversation)
+              $scope.conversation[i].isWaiting = true;
+          };
+        }
+
+        //SUCC_PRIVATE_DISCUSSION_ACCEPTED
+        if(data.toString().indexOf('SUCC_PRIVATE_DISCUSSION_ACCEPTED') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation)
+              el.messages.push({status: 'received', text: 'conversation accepted', sender: $scope.currentConversation});
+          });
+          $scope.acceptConversation();  
+        }
+        
+        //SUCC_PRIVATE_DISCUSSION_REFUSED
+        if(data.toString().indexOf('SUCC_PRIVATE_DISCUSSION_REFUSED') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation)
+              el.messages.push({status: 'received', text: 'conversation rejected', sender: $scope.currentConversation});
+          });
+          $scope.rejectConversation();
+        }
+
+        //SUCC_PM_SENDED
+        if(data.toString().indexOf('SUCC_PM_SENDED') != -1) {
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation)
+              el.messages.push({status: 'sended', text: $scope.privateMessageToSend, sender: $scope.userName});
+          });
+          $scope.privateMessageToSend = '';
+        }
+
         // Refresh scope
         $scope.$apply();
     });
 });
 
-
-app.controller('MessageCtrl', function($scope, Tools) {
-  ;
-});
 
