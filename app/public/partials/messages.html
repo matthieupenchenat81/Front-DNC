@@ -11,17 +11,10 @@
 
   <div ng-repeat="message in getCurrentConversation()" class="row fixrow">
     <div ng-if="message.status == 'sended'" class="bubble-right right">{{message.text}}<br><small class="right">{{message.sender}}</small></div>
-    <div ng-if="message.status == 'received'" class="bubble-left left">{{message.text}}<br><small class="left">{{message.sender}}</small></div>
+    <div ng-if="message.status == 'received' && !isAskingToShare(message)" class="bubble-left left">{{message.text}}<br><small class="left">{{message.sender}}</small></div>
+    <div ng-if="isAskingToShare(message)" class="bubble-left left">{{message.text}}<br>
+       <button type="submit" class="btn btn-primary btn-sm" ng-click="acceptfile()">Accept file</button>
+       <button type="submit" class="btn btn-primary btn-sm" ng-click="rejectfile()">Reject file</button><br>
+      <small class="left">{{message.sender}}</small></div>
   </div>
-
-  <!-- <div class="row fixrow">
-    <div class="bubble-right right">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</div>
-  </div>
-  <div class="row fixrow">
-    <div class="bubble-left left">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</div>
-  </div>          
-    
-  <div class="row fixrow">
-    <div class="bubble-left left">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</div>
-  </div> -->
 </div>

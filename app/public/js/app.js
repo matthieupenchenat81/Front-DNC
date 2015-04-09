@@ -145,12 +145,17 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
     };
 
     $scope.sendPrivateMessage = function(message) {
-      Tools.getClient().write('/pm ' + $scope.currentConversation + ' ' + message);
-      $scope.privateMessageToSend = message;
+      if(message != undefined) {
+        Tools.getClient().write('/pm ' + $scope.currentConversation + ' ' + message);
+        $scope.privateMessageToSend = message;
+      }
       $scope.fileName = $("#file").val().replace(/.*(\/|\\)/, '');
       if($scope.fileName != '') {
         setTimeout(function() {
           Tools.getClient().write('/pmfile ' + $scope.currentConversation + ' ' + $scope.fileName);
+          //Make input empty =>
+          var control = $("#file");
+          control.replaceWith( control = control.clone( true ) );
         }, 1000);
       }
     };
@@ -206,6 +211,20 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           return $scope.conversation[i].hasBeenAsked;
       };
     };
+
+    $scope.acceptfile = function() {
+      Tools.getClient().write('/acceptfile ' + $scope.currentConversation + ' ' + '<file_name>' + ' ' + '<IP>' + ' ' + '<PORT>');
+    }
+
+    $scope.rejectfile = function() {
+      Tools.getClient().write('/rejectfile ' + $scope.currentConversation + ' ' + '<file_name>');
+    }
+
+    $scope.isAskingToShare = function(message) {
+      if(message.status == 'received' && message.text.indexOf('asking to share:') != -1)
+        return true;
+      return false;
+    }
 
     $scope.init = function() {
   
@@ -425,7 +444,17 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
             }
           });
           $scope.fileName = '';
-        }        
+        }
+
+        //NEW_FILE_REQUEST Malibu81
+        if(data.toString().indexOf('NEW_FILE_REQUEST') != -1) {
+          var sender = data.toString().split(' ')[1];
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == $scope.currentConversation) {
+              el.messages.push({status: 'received', text: 'asking to share: ' + $scope.fileName, sender: sender});
+            }
+          });
+        }
 
 
         // Refresh scope
