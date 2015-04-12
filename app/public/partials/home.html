@@ -27,12 +27,12 @@
   <div class="row">
       <div class="col-xs-4 scroll">
         <a ng-click="openConversation('all')" class="click"><h3>#Discussion générale</h3></a><hr>
-        <h3>Utilisateurs connectés</h3>
+        <h3>Connected users</h3>
         <div class="list-group">
 
 
           <a ng-repeat="user in users" ng-click="openConversation(user)" class="list-group-item click">{{user}}</a>
-          <a ng-repeat="user in afkUsers" ng-click="openConversation(user)" class="list-group-item list-group-item-warning click">{{user}}</a>
+          <a ng-repeat="user in afkUsers" disabled class="list-group-item list-group-item-warning">{{user}}</a>
         </div>
       </div>
 
