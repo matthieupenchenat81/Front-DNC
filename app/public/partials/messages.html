@@ -2,11 +2,11 @@
 
 
 <div ng-show="isGeneralConversation()">
-  <h4>Discussion générale</h4><hr>
+  <h4>General discussion</h4><hr>
 </div>
 
 <div ng-show="!isGeneralConversation()">
-  <h4>Discussion avec {{ currentConversation }}</h4><hr>
+  <h4>Discussion with {{ currentConversation }}</h4><hr>
 </div>
 
   <div ng-repeat="message in getCurrentConversation()" class="row fixrow">

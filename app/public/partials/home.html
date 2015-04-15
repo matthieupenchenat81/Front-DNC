@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <span class="navbar-brand click">DNC-Client</span>
-        <p class="navbar-text">Signed in as {{userName}} <!-- <a style="margin-left: 10px" class="navbar-right click" ng-click="logout()">Log out</a> --></p>
+        <p class="navbar-text">Signed in as {{userName}}</p>
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
             <input type="text" ng-model="newname" class="form-control" placeholder="Update pseudo">
@@ -26,11 +26,9 @@
 <div class="container-fluid">
   <div class="row">
       <div class="col-xs-4 scroll">
-        <a ng-click="openConversation('all')" class="click"><h3>#Discussion générale</h3></a><hr>
+        <a ng-click="openConversation('all')" class="click"><h3>#General Discussion</h3></a><hr>
         <h3>Connected users</h3>
         <div class="list-group">
-
-
           <a ng-repeat="user in users" ng-click="openConversation(user)" class="list-group-item click">{{user}}</a>
           <a ng-repeat="user in afkUsers" disabled class="list-group-item list-group-item-warning">{{user}}</a>
         </div>
@@ -44,17 +42,21 @@
 <nav class="navbar navbar-default bottom" style="margin-bottom: 0">
   <br>
   <div ng-show="isGeneralConversation()" class="container-fluid">
-    <textarea class="form-control" ng-model="messageToSend"></textarea><br>
-    <button type="submit" class="btn btn-primary" style="float:right" ng-click="sendMessage(messageToSend)">Send</button>
+    <form role="form">
+      <div class="col-sm-11"><input class="form-control" placeholder="Enter a message" ng-model="messageToSend"/></div>
+      <button type="submit" class="btn btn-primary" ng-click="sendMessage(messageToSend)">Send</button>
+    </form>
   </div>
 
   <div ng-show="!isGeneralConversation()" class="container-fluid">
     <div ng-if="hasAccepted()">
-      <textarea class="form-control" id="privateMessageId" ng-model="privateMessageToSend"></textarea><br>
-      <div class="col-xs-offset-7 col-xs-4">
-        <input class="form-control" id="file" type="file"/>
-      </div>
-      <button type="submit" class="btn btn-primary" style="float:right" ng-click="sendPrivateMessage(privateMessageToSend)">Send</button>
+      <form role="form">
+        <input class="form-control" id="privateMessageId" placeholder="Enter a message" ng-model="privateMessageToSend"/><br>
+        <div class="col-xs-offset-7 col-xs-4">
+          <input class="form-control" id="file" type="file"/>
+        </div>
+        <button type="submit" class="btn btn-primary" style="float:right" ng-click="sendPrivateMessage(privateMessageToSend)">Send</button>
+      <form role="form">
     </div>
     <div ng-if="!hasAccepted()">
       <button type="submit" class="btn btn-primary" ng-if="!isWaiting() && !hasBeenAsked()" style="float:right" ng-click="askToTalk()">Ask to have conversation</button>

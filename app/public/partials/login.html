@@ -8,12 +8,10 @@ Inspired by http://dribbble.com/shots/917819-iPad-Calendar-Login?list=shots&sort
     <h2>Login</h2>
     <div class="box">
     	<form role="form">
-        <!-- <div class="row">
-          <input class="col-xs-6" type="text" placeholder="IP adress" required="required" ng-model="ip">
-          <input class="col-xs-6" type="text" placeholder="num port" required="required" ng-model="port">
-        </div> -->          
-	        <input type="text" placeholder="Nickname" autofocus required="required" ng-model="userName">
-		    <button type="submit" class="btn btn-default full-width" ng-click="login(userName)"><span class="glyphicon glyphicon-ok"></span></button>
+        <input class="col-xs-5" style="margin-right: 10px" type="text" placeholder="IP adress" ng-model="ip">
+        <input class="col-xs-5" type="text" placeholder="num port" ng-model="port">
+        <input type="text" placeholder="Nickname" autofocus required="required" ng-model="userName">
+		    <button type="submit" class="btn btn-default full-width" ng-click="login(userName, ip, port)"><span class="glyphicon glyphicon-ok"></span></button>
 	    </form>
     </div>
   </div>

@@ -17,13 +17,13 @@
     },
     "window": {
         "title": "clientdnc",
-        "toolbar": true,
+        "toolbar": false,
         "frame": true,
         "position": "center",
         "fullscreen": false,
-        "resizable": true,
+        "resizable": false,
         "width": 1100,
-        "height": 655
+        "height": 635
     },
     "node-remote": "<local>"
 }

@@ -56,24 +56,25 @@ app.factory('Tools', function($rootScope) {
 
 app.controller('LoginCtrl', function($scope, $state, $rootScope, Tools) {
 
-    $scope.login = function(user) {
+    $scope.login = function(user, HOST, PORT) {
 
-      var HOST = '127.0.0.1';
-      //var HOST = '172.31.190.68';
-      var PORT = 2222;
+      if(PORT != undefined && PORT != '' && HOST != undefined && HOST != '') {
+        Tools.createClient();
+        Tools.getClient().connect(PORT, HOST, function() {
 
-      Tools.createClient();
-      Tools.getClient().connect(PORT, HOST, function() {
+            console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+            Tools.getClient().write('/newname '+ user);
 
-          console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-          Tools.getClient().write('/newname '+ user);
-
-          $state.go('home.message', {
-            pseudo: 'all'
-          });
-          Tools.setUser(user);
-      });
+            $state.go('home.message', {
+              pseudo: 'all'
+            });
+            Tools.setUser(user);
+        });
+      }
     };
+
+    $scope.port = "2222";
+    $scope.ip = "localhost";
 });
 
 app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
@@ -143,20 +144,82 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       }
     };
 
-    $scope.sendPrivateMessage = function(message) {
-      if(message != undefined || message != '') {
+    $scope.sendPrivateMessage = function() {
+      var message = $('#privateMessageId').val();
+      if(message != undefined && message != '') {
         Tools.getClient().write('/pm ' + $scope.currentConversation + ' ' + message);
-        $scope.privateMessageToSend = message;
       }
       $scope.fileName = $("#file").val().replace(/.*(\/|\\)/, '');
       if($scope.fileName != '') {
         setTimeout(function() {
-          Tools.getClient().write('/pmfile ' + $scope.currentConversation + ' ' + $scope.fileName);
+          Tools.getClient().write('/pmfile ' + $scope.currentConversation + ' ' + $("#file").val());
           //Make input empty =>
           var control = $("#file");
           control.replaceWith( control = control.clone( true ) );
         }, 1000);
       }
+    };
+
+    $scope.downloadFile = function() {
+      var net = require('net');
+      var fs = require('fs');
+
+      net.createServer(function(socket){
+        var buffer = new Buffer(0, 'binary');
+
+        socket.on("data", function(data){
+          buffer = Buffer.concat([buffer, new Buffer(data,'binary')]);
+        });
+
+        socket.on("end", function(data) {
+          fs.writeFile($scope.fileName, buffer, function(err) {
+            if(err) {
+              console.log(err);
+            } else {
+              console.log("file wrote with success");
+            }
+          }); 
+
+        });
+
+      }).listen(2221);
+    };
+
+    $scope.sendFile = function(path, ip, port) {
+      
+      var net = require('net');
+      var fs = require('fs');
+
+      var PORT = port;
+      var HOST = ip;
+      var FILEPATH = path;
+
+      var client = new net.Socket()
+
+      //connect to the server
+      client.connect(PORT,HOST,function() {
+          'Client Connected to server'
+
+          //send a file to the server
+          var fileStream = fs.createReadStream(FILEPATH);
+          fileStream.on('error', function(err){
+              console.log(err);
+          })
+
+          fileStream.on('open',function() {
+              fileStream.pipe(client);
+          });
+
+      });
+
+      //handle closed
+      client.on('close', function() {
+          console.log('server closed connection')
+      });
+
+      client.on('error', function(err) {
+          console.log(err);
+      });
     };
 
     $scope.hasAccepted = function() {
@@ -212,11 +275,11 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
     };
 
     $scope.acceptfile = function() {
-      Tools.getClient().write('/acceptfile ' + $scope.currentConversation + ' ' + '2221' + ' ' + $scope.fileName);
+      Tools.getClient().write('/acceptfile ' + $scope.currentConversation + ' ' + '2221' + ' ' + $scope.path);
     };
 
     $scope.rejectfile = function() {
-      Tools.getClient().write('/rejectfile ' + $scope.currentConversation + ' ' + $scope.fileName);
+      Tools.getClient().write('/rejectfile ' + $scope.currentConversation + ' ' + $scope.path);
     };
 
     $scope.isAskingToShare = function(message) {
@@ -242,6 +305,7 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       $scope.conversation.push({name: 'all', messages: []});
 
       $scope.userName = Tools.getUser();
+      $scope.userList();
     };
 
     $scope.init();
@@ -263,8 +327,6 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         if(data.toString() == '200') {
 
           // SUCC_CHANNEL_JOINED
-          $scope.userList();
-          setTimeout(function() { $scope.userListAway(); }, 2000); 
         };
 
         // User list enabled
@@ -272,10 +334,16 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
 
           var users = data.toString().split("300 ")[1].split(' ');
           $scope.users = users;
+
+          var index = $scope.users.indexOf($scope.userName);
+          if (index > -1)
+            $scope.users.splice(index, 1);
+          
           angular.forEach($scope.users, function(el) {
             if(el != $scope.userName)
               $scope.conversation.push({name: el, messages: [], hasAccepted: false, isWaiting: false});
           });
+          $scope.userListAway();
         };
 
         // User list disabled
@@ -345,6 +413,9 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
             $scope.users.splice(index, 1);
             if(!$scope.afkUsers) $scope.afkUsers = [];
             $scope.afkUsers.push(user);
+
+            if($scope.currentConversation == user)
+              $scope.openConversation('all');
           }
         }
 
@@ -361,6 +432,7 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         //HAS_LEFT alooo
         if(data.toString().indexOf('303 ') != -1) {
           var user = data.toString().split(' ')[1];
+          if($scope.users == undefined) $scope.users = [];
           var index = $scope.afkUsers.indexOf(user);
           if (index > -1)
             $scope.afkUsers.splice(index, 1);
@@ -374,7 +446,9 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         //HAS_JOIN bobibbb
         if(data.toString().indexOf('302 ') != -1) {
           var user = data.toString().split(' ')[1];
+          if($scope.users == undefined) $scope.users = [];
           $scope.users.push(user);
+          $scope.conversation.push({name: user, messages: [], hasAccepted: false, isWaiting: false});
         }
 
 
@@ -415,11 +489,9 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         if(data.toString().indexOf('205') != -1) {
           angular.forEach($scope.conversation, function(el) {
             if(el.name == $scope.currentConversation)
-              el.messages.push({status: 'sended', text: $scope.privateMessageToSend, sender: $scope.userName});
+              el.messages.push({status: 'sended', text: $('#privateMessageId').val(), sender: $scope.userName});
           });
           $('#privateMessageId').val('');
-          $scope.privateMessageToSend = '';
-          $rootScope.privateMessageToSend = '';
         }
 
         //NEW_PM Quentin blabla
@@ -478,22 +550,53 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         //NEW_FILE_REQUEST Malibu81
         if(data.toString().indexOf('312 ') != -1) {
           var sender = data.toString().split(' ')[1];
-          $scope.fileName = data.toString().split(sender)[1];
+          $scope.path = data.toString().split(sender)[1];
+          var fileName = $scope.path.replace(/.*(\/|\\)/, '');
+          $scope.fileName = fileName;
           angular.forEach($scope.conversation, function(el) {
             if(el.name == sender) {
-              el.messages.push({status: 'received', text: 'asking to share: ' + $scope.fileName, sender: sender});
+              el.messages.push({status: 'received', text: 'asking to share: ' + fileName, sender: sender});
             }
           });
         }
 
+
+        //313: CAN_SEND_FILE <nick> <port> <ip> <path>
+        if(data.toString().indexOf('313 ') != -1) {
+          var sender = data.toString().split(' ')[1];
+          var args= data.toString().split('313 ')[1];
+          var port = args.split(' ')[2];
+          var ip = args.split(' ')[1];
+          var path = data.toString().split(port+ ' ')[1];
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == sender) {
+              el.messages.push({status: 'received', text: 'file received', sender: sender});
+            }
+          });
+          $scope.sendFile(path, ip, port);
+        }
+
+        //314: HAS_REJECT_FILE <nick> <path>
+        if(data.toString().indexOf('314 ') != -1) {
+          var sender = data.toString().split(' ')[1];
+          var path = data.toString().split(sender+ ' ')[1];
+          angular.forEach($scope.conversation, function(el) {
+            if(el.name == sender) {
+              el.messages.push({status: 'received', text: 'has rejected: ' + path.replace(/.*(\/|\\)/, ''), sender: sender});
+            }
+          });
+        }
+
+
         //SUCC_ACCEPTED_FILE
-        if(data.toString() == '212') {
+        if(data.toString().indexOf('212 ') != -1) {
           angular.forEach($scope.conversation, function(el) {
             if(el.name == $scope.currentConversation) {
               el.messages.push({status: 'sended', text: 'file accepted', sender: $scope.userName});
             }
           });
-        }        
+          $scope.downloadFile();
+        }
 
         //SUCC_REFUSED_FILE
         if(data.toString() == '213') {
