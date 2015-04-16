@@ -7,7 +7,8 @@ var app = angular.module('clientdnc', ['ui.router'])
   .factory('Window', ['GUI', function(gui) {
     return gui.Window.get();
   }])
-  
+
+// These configs present the differents state of page. (html partials)
 app.config(function ($stateProvider, $urlRouterProvider) {
 
   $urlRouterProvider.otherwise("/login");
@@ -26,6 +27,8 @@ app.config(function ($stateProvider, $urlRouterProvider) {
   });
 });
 
+
+// This factory allows to access from different controllers the username and the clientSocket.
 app.factory('Tools', function($rootScope) {
 
         // Node Js - Request to serveur
@@ -54,17 +57,20 @@ app.factory('Tools', function($rootScope) {
     }
 );
 
+// This is the login controller
 app.controller('LoginCtrl', function($scope, $state, $rootScope, Tools) {
 
     $scope.login = function(user, HOST, PORT) {
 
       if(PORT != undefined && PORT != '' && HOST != undefined && HOST != '') {
+        // Create and connect the client to host
         Tools.createClient();
         Tools.getClient().connect(PORT, HOST, function() {
 
             console.log('CONNECTED TO: ' + HOST + ':' + PORT);
             Tools.getClient().write('/newname '+ user);
 
+            // Redirect to home state
             $state.go('home.message', {
               pseudo: 'all'
             });
@@ -78,25 +84,37 @@ app.controller('LoginCtrl', function($scope, $state, $rootScope, Tools) {
 });
 
 app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
-    
 
+
+  //
+  //
+  //
+  // Function to animate (with JavaScript) this app (some events)
+  // to open modal, open a discussion, etc..
+  //
+  //
+    
+    // This function is used to close the modal (away from keyboard)
     $scope.closeModal = function() {
       $('#options').modal('hide');
     };
 
+    // If the modal is hidden not by clicking on image, there is also /enable message
+    $('#options').on('hidden.bs.modal', function () {
+      Tools.getClient().write('/enable');
+    });
+
+    // This function is used to open the modal (away from keyboard)
     $scope.openModal = function() {
       $('#options').modal('show');
     }
-    
-    $scope.logout = function() {
-      Tools.getClient().write('/quit');
-    };
 
+    // This function allow to know if the app is currently in generalConversation state
     $scope.isGeneralConversation = function() {
-
       return ($scope.currentConversation == 'all');
     };
 
+    // Allow to open a conversation (private or general)
     $scope.openConversation = function(nickname) {
 
       $scope.currentConversation = nickname;
@@ -115,6 +133,7 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
         $scope.conversation.push({name: nickname, messages: [], hasAccepted: false, isWaiting: false});
     };
 
+    // Return the current conversation (messages)
     $scope.getCurrentConversation = function() {
       
       angular.forEach($scope.conversation, function(el) {
@@ -124,19 +143,103 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       return $scope.messages;
     };
 
+    // Allow to know if the current conversation has been accepted
+    $scope.hasAccepted = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          return $scope.conversation[i].hasAccepted;
+      };
+    };
+
+    // To accept a conversation (from view)
+    $scope.acceptConversation = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          $scope.conversation[i].hasAccepted = true;
+      };
+    };
+
+    // To reject a conversation (from view)
+    $scope.rejectConversation = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          $scope.conversation[i].hasAccepted = false;
+      };
+
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          $scope.conversation[i].isWaiting = false;
+      };
+    };
+
+    // To know if the conversation is waiting for a accept or reject from the other user
+    $scope.isWaiting = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          return $scope.conversation[i].isWaiting;
+      };
+    };
+
+    // To know if the user has been asked to have a conversation from an other
+    $scope.hasBeenAsked = function() {
+      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
+        if($scope.conversation[i].name == $scope.currentConversation)
+          return $scope.conversation[i].hasBeenAsked;
+      };
+    };
+
+    // Allow to know if the user is asking to share a file 
+    $scope.isAskingToShare = function(message) {
+      if(message.status == 'received' && message.text.indexOf('asking to share:') != -1)
+        return true;
+      return false;
+    };
+
+    // Function to init main controller
+    $scope.init = function() {
+  
+      $scope.messages = [];
+      $scope.conversation = [];
+
+      $scope.currentConversation = 'all';
+      $scope.conversation.push({name: 'all', messages: []});
+
+      $scope.userName = Tools.getUser();
+      $scope.userList();
+    };
+
+
+  //
+  //
+  //
+  //  All these followed functions send messages from client to serveur
+  //
+  //
+  //
+
+    // Calling this function, the user will be log out from DNC
+    $scope.logout = function() {
+      Tools.getClient().write('/quit');
+    };
+
+    // To get disable from DNC
     $scope.putAsdisable = function() {
       Tools.getClient().write('/disable');      
     };
 
+    // To get enable from DNC
     $scope.putAsEnable = function() {
       Tools.getClient().write('/enable');      
     };
 
+    // Allow to change the username
     $scope.changeUserName = function(newname) {
 
-      Tools.getClient().write('/name '+ newname);
+      if(newname != '' && newname != undefined)
+        Tools.getClient().write('/name '+ newname);
     };
 
+    // Allow to send a message in general discussion
     $scope.sendMessage = function(message) {
 
       if($scope.isGeneralConversation()) {
@@ -144,6 +247,7 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       }
     };
 
+    // Allow to send a private message
     $scope.sendPrivateMessage = function() {
       var message = $('#privateMessageId').val();
       if(message != undefined && message != '') {
@@ -160,6 +264,7 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       }
     };
 
+    // When accepting a file, this function is called and download the file
     $scope.downloadFile = function() {
       var net = require('net');
       var fs = require('fs');
@@ -181,10 +286,11 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
           }); 
 
         });
-
+    
       }).listen(2221);
     };
 
+    // This function allow to send a file to an other user
     $scope.sendFile = function(path, ip, port) {
       
       var net = require('net');
@@ -222,112 +328,57 @@ app.controller('MainCtrl', function ($scope, $state, $rootScope, Tools) {
       });
     };
 
-    $scope.hasAccepted = function() {
-      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-        if($scope.conversation[i].name == $scope.currentConversation)
-          return $scope.conversation[i].hasAccepted;
-      };
-    };
-
-    $scope.acceptConversation = function() {
-      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-        if($scope.conversation[i].name == $scope.currentConversation)
-          $scope.conversation[i].hasAccepted = true;
-      };
-    };
-
-    $scope.rejectConversation = function() {
-      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-        if($scope.conversation[i].name == $scope.currentConversation)
-          $scope.conversation[i].hasAccepted = false;
-      };
-
-      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-        if($scope.conversation[i].name == $scope.currentConversation)
-          $scope.conversation[i].isWaiting = false;
-      };
-    };
-
+    // To accept private conversation sending /acceptpm message to the serveur
     $scope.acceptPrivateConversation = function() {
       Tools.getClient().write('/acceptpm '+ $scope.currentConversation);
     };
 
+    // To reject private conversation sending a /rejectpm message to the serveur
     $scope.rejectPrivateConversation = function() {
       Tools.getClient().write('/rejectpm '+ $scope.currentConversation);
     };
 
+    // To send a request to begin a private conversation
     $scope.askToTalk = function() {
       Tools.getClient().write('/askpm '+ $scope.currentConversation);
     };
 
-    $scope.isWaiting = function() {
-      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-        if($scope.conversation[i].name == $scope.currentConversation)
-          return $scope.conversation[i].isWaiting;
-      };
-    };
-
-    $scope.hasBeenAsked = function() {
-      for (var i = $scope.conversation.length - 1; i >= 0; i--) {
-        if($scope.conversation[i].name == $scope.currentConversation)
-          return $scope.conversation[i].hasBeenAsked;
-      };
-    };
-
+    // To accept a file from an user 
     $scope.acceptfile = function() {
       Tools.getClient().write('/acceptfile ' + $scope.currentConversation + ' ' + '2221' + ' ' + $scope.path);
     };
 
+    // To reject a file from an user
     $scope.rejectfile = function() {
       Tools.getClient().write('/rejectfile ' + $scope.currentConversation + ' ' + $scope.path);
     };
 
-    $scope.isAskingToShare = function(message) {
-      if(message.status == 'received' && message.text.indexOf('asking to share:') != -1)
-        return true;
-      return false;
-    };
-
+    // To get users list
     $scope.userList = function() {
       Tools.getClient().write('/userlist');
     };
 
+    // To get users list away
     $scope.userListAway = function() {
       Tools.getClient().write('/userlistaway');
     };
 
-    $scope.init = function() {
-  
-      $scope.messages = [];
-      $scope.conversation = [];
+    // To init the main controller
+    $scope.init(); 
 
-      $scope.currentConversation = 'all';
-      $scope.conversation.push({name: 'all', messages: []});
 
-      $scope.userName = Tools.getUser();
-      $scope.userList();
-    };
 
-    $scope.init();
+  //
+  //
+  //
+  //  All these following instrutions is about data received from serveur 
+  //  There is a specific behaviour depending on data received
+  //
+  //
 
-    // Add a 'data' event handler for the client socket
-    // data is what the server sent to this socket
     Tools.getClient().on('data', function(data) {
         
         console.log('DATA: ' + data);
-
-        //ERR_NICKNAME_ALREADY_USED
-        //ERR_INVALID_NICKNAME
-        //ERR_NICKNAME_ALREADY_USED
-        //ERR_USER_HAS_NOT_ASK
-        //ERR_DEST_NOT_FOUND
-        //ERR_NOT_ACCEPTED
-
-        //SUCC_CHANNEL_JOINED
-        if(data.toString() == '200') {
-
-          // SUCC_CHANNEL_JOINED
-        };
 
         // User list enabled
         if(data.toString().indexOf('300 ') != -1) {
